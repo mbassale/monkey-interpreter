@@ -18,10 +18,13 @@ const (
 	// identifiers and literals
 	IDENTIFIER = "IDENTIFIER"
 	INT        = "INT"
+	STRING     = "STRING"
 
 	// operators
 	ASSIGN = "="
 	PLUS   = "+"
+	MINUS  = "-"
+	STAR   = "*"
 
 	// delimiters
 	COMMA     = ","
