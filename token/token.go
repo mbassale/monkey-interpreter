@@ -7,8 +7,20 @@ type Token struct {
 	Literal string
 }
 
+var keywords = map[string]TokenType{
+	"fn":  FUNCTION,
+	"let": LET,
+}
+
 func NewToken(tokenType TokenType, ch byte) Token {
 	return Token{Type: tokenType, Literal: string(ch)}
+}
+
+func LookupIdentifierTokenType(identifier string) TokenType {
+	if tokenType, ok := keywords[identifier]; ok {
+		return tokenType
+	}
+	return IDENTIFIER
 }
 
 const (
@@ -24,7 +36,12 @@ const (
 	ASSIGN = "="
 	PLUS   = "+"
 	MINUS  = "-"
+	BANG   = "!"
 	STAR   = "*"
+	SLASH  = "/"
+
+	LESS_THAN    = "<"
+	GREATER_THAN = ">"
 
 	// delimiters
 	COMMA     = ","
