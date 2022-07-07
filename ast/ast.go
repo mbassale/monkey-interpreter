@@ -36,6 +36,10 @@ func (p *Program) TokenLiteral() string {
 	}
 }
 
+func NewProgram() *Program {
+	return &Program{Statements: []Statement{}}
+}
+
 type LetStatement struct {
 	Token token.Token
 	Name  *Identifier
