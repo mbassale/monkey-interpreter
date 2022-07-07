@@ -54,6 +54,12 @@ func TestSource(t *testing.T) {
 	};
 
 	let result = add(five, ten);
+
+	if (5 < 10) {
+		return true;
+	} else {
+		return false;
+	}
 	`
 
 	tests := []struct {
@@ -107,6 +113,33 @@ func TestSource(t *testing.T) {
 		{token.IDENTIFIER, "ten"},
 		{token.RPAREN, ")"},
 		{token.SEMICOLON, ";"},
+
+		// line 10
+		{token.IF, "if"},
+		{token.LPAREN, "("},
+		{token.INT, "5"},
+		{token.LESS_THAN, "<"},
+		{token.INT, "10"},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+
+		// line 11
+		{token.RETURN, "return"},
+		{token.TRUE, "true"},
+		{token.SEMICOLON, ";"},
+
+		// line 12
+		{token.RBRACE, "}"},
+		{token.ELSE, "else"},
+		{token.LBRACE, "{"},
+
+		// line 13
+		{token.RETURN, "return"},
+		{token.FALSE, "false"},
+		{token.SEMICOLON, ";"},
+
+		// line 14
+		{token.RBRACE, "}"},
 
 		// EOF
 		{token.EOF, ""},
