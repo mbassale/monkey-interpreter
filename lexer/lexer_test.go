@@ -7,14 +7,14 @@ import (
 )
 
 func TestSingleCharacterTokens(t *testing.T) {
-	input := `!=+-*/<>(){},;`
+	input := `=!+-*/<>(){},;`
 
 	tests := []struct {
 		expectedType    token.TokenType
 		expectedLiteral string
 	}{
-		{token.BANG, "!"},
 		{token.ASSIGN, "="},
+		{token.BANG, "!"},
 		{token.PLUS, "+"},
 		{token.MINUS, "-"},
 		{token.STAR, "*"},
@@ -60,6 +60,9 @@ func TestSource(t *testing.T) {
 	} else {
 		return false;
 	}
+
+	10==10;
+	10!=9;
 	`
 
 	tests := []struct {
@@ -140,6 +143,18 @@ func TestSource(t *testing.T) {
 
 		// line 14
 		{token.RBRACE, "}"},
+
+		// line 16
+		{token.INT, "10"},
+		{token.EQUAL, "=="},
+		{token.INT, "10"},
+		{token.SEMICOLON, ";"},
+
+		// line 17
+		{token.INT, "10"},
+		{token.NOT_EQUAL, "!="},
+		{token.INT, "9"},
+		{token.SEMICOLON, ";"},
 
 		// EOF
 		{token.EOF, ""},

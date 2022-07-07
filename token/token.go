@@ -21,6 +21,10 @@ func NewToken(tokenType TokenType, ch byte) Token {
 	return Token{Type: tokenType, Literal: string(ch)}
 }
 
+func NewTokenWithLiteral(tokenType TokenType, literal string) Token {
+	return Token{Type: tokenType, Literal: literal}
+}
+
 func LookupIdentifierTokenType(identifier string) TokenType {
 	if tokenType, ok := keywords[identifier]; ok {
 		return tokenType
@@ -47,6 +51,9 @@ const (
 
 	LESS_THAN    = "<"
 	GREATER_THAN = ">"
+
+	EQUAL     = "=="
+	NOT_EQUAL = "!="
 
 	// delimiters
 	COMMA     = ","

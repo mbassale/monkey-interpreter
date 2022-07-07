@@ -15,16 +15,6 @@ func New(input string) *Lexer {
 	return l
 }
 
-func (l *Lexer) readChar() {
-	if l.nextPosition >= len(l.input) {
-		l.currentChar = 0
-	} else {
-		l.currentChar = l.input[l.nextPosition]
-	}
-	l.position = l.nextPosition
-	l.nextPosition += 1
-}
-
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
@@ -32,7 +22,14 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.currentChar {
 	case '=':
-		tok = token.NewToken(token.ASSIGN, l.currentChar)
+		if l.peekChar() == '=' {
+			ch := l.currentChar
+			l.readChar()
+			literal := string(ch) + string(l.currentChar)
+			tok = token.NewTokenWithLiteral(token.EQUAL, literal)
+		} else {
+			tok = token.NewToken(token.ASSIGN, l.currentChar)
+		}
 	case '+':
 		tok = token.NewToken(token.PLUS, l.currentChar)
 	case '-':
@@ -42,7 +39,14 @@ func (l *Lexer) NextToken() token.Token {
 	case '/':
 		tok = token.NewToken(token.SLASH, l.currentChar)
 	case '!':
-		tok = token.NewToken(token.BANG, l.currentChar)
+		if l.peekChar() == '=' {
+			ch := l.currentChar
+			l.readChar()
+			literal := string(ch) + string(l.currentChar)
+			tok = token.NewTokenWithLiteral(token.NOT_EQUAL, literal)
+		} else {
+			tok = token.NewToken(token.BANG, l.currentChar)
+		}
 	case '<':
 		tok = token.NewToken(token.LESS_THAN, l.currentChar)
 	case '>':
@@ -79,6 +83,24 @@ func (l *Lexer) NextToken() token.Token {
 	l.readChar()
 
 	return tok
+}
+
+func (l *Lexer) readChar() {
+	if l.nextPosition >= len(l.input) {
+		l.currentChar = 0
+	} else {
+		l.currentChar = l.input[l.nextPosition]
+	}
+	l.position = l.nextPosition
+	l.nextPosition += 1
+}
+
+func (l *Lexer) peekChar() byte {
+	if l.nextPosition >= len(l.input) {
+		return 0
+	} else {
+		return l.input[l.nextPosition]
+	}
 }
 
 func (l *Lexer) readIdentifier() string {
