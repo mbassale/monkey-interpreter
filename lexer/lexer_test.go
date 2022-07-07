@@ -1,6 +1,7 @@
-package lexer
+package lexer_test
 
 import (
+	"monkey/lexer"
 	"monkey/token"
 	"testing"
 )
@@ -22,7 +23,7 @@ func TestNextToken(t *testing.T) {
 		{token.SEMICOLON, ";"},
 	}
 
-	l := New(input)
+	l := lexer.New(input)
 
 	for i, tt := range tests {
 		tok := l.NextToken()
