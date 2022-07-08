@@ -1,6 +1,9 @@
 package ast
 
-import "monkey/token"
+import (
+	"bytes"
+	"monkey/token"
+)
 
 /**********************************************************
 AST Base Interfaces
@@ -8,6 +11,7 @@ AST Base Interfaces
 
 type Node interface {
 	TokenLiteral() string
+	String() string
 }
 
 type Statement interface {
@@ -36,6 +40,14 @@ func (p *Program) TokenLiteral() string {
 	}
 }
 
+func (p *Program) String() string {
+	var out bytes.Buffer
+	for _, s := range p.Statements {
+		out.WriteString(s.String())
+	}
+	return out.String()
+}
+
 func NewProgram() *Program {
 	return &Program{Statements: []Statement{}}
 }
@@ -49,6 +61,18 @@ type LetStatement struct {
 func (stmt *LetStatement) statementNode()       {}
 func (stmt *LetStatement) TokenLiteral() string { return stmt.Token.Literal }
 
+func (stmt *LetStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString(stmt.TokenLiteral() + " ")
+	out.WriteString(stmt.Name.String())
+	out.WriteString(" = ")
+	if stmt.Value != nil {
+		out.WriteString(stmt.Value.String())
+	}
+	out.WriteString(";")
+	return out.String()
+}
+
 type ReturnStatement struct {
 	Token       token.Token
 	ReturnValue Expression
@@ -56,6 +80,16 @@ type ReturnStatement struct {
 
 func (stmt *ReturnStatement) statementNode()       {}
 func (stmt *ReturnStatement) TokenLiteral() string { return stmt.Token.Literal }
+
+func (stmt *ReturnStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString(stmt.TokenLiteral() + " ")
+	if stmt.ReturnValue != nil {
+		out.WriteString(stmt.ReturnValue.String())
+	}
+	out.WriteString(";")
+	return out.String()
+}
 
 type ExpressionStatement struct {
 	Token      token.Token // first token in the expression
@@ -65,6 +99,13 @@ type ExpressionStatement struct {
 func (stmt *ExpressionStatement) statementNode()       {}
 func (stmt *ExpressionStatement) TokenLiteral() string { return stmt.Token.Literal }
 
+func (stmt *ExpressionStatement) String() string {
+	if stmt.Expression != nil {
+		return stmt.Expression.String()
+	}
+	return ""
+}
+
 type Identifier struct {
 	Token token.Token
 	Value string
@@ -72,3 +113,7 @@ type Identifier struct {
 
 func (expr *Identifier) expressionNode()      {}
 func (expr *Identifier) TokenLiteral() string { return expr.Token.Literal }
+
+func (expr *Identifier) String() string {
+	return expr.Value
+}
