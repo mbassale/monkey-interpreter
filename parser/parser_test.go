@@ -72,41 +72,6 @@ func TestReturnStatement(t *testing.T) {
 	}
 }
 
-func TestParsingPrefixExpressions(t *testing.T) {
-	prefixTests := []struct {
-		input        string
-		operator     string
-		integerValue int64
-	}{
-		{"!5;", "!", 5},
-		{"-15;", "-", 15},
-	}
-
-	for _, tt := range prefixTests {
-		lexer := lexer.New(tt.input)
-		parser := parser.New(lexer)
-		program := parser.ParseProgram()
-		checkParseErrors(t, parser)
-
-		assert.Len(t, program.Statements, 1)
-
-		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-		if !ok {
-			t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
-		}
-
-		expr, ok := stmt.Expression.(*ast.PrefixExpression)
-		if !ok {
-			t.Fatalf("stmt is not ast.PrefixExpression. got=%T", stmt.Expression)
-		}
-
-		assert.Equal(t, expr.Operator, tt.operator)
-		if !testIntegerLiteral(t, expr.Right, tt.integerValue) {
-			return
-		}
-	}
-}
-
 func TestIdentifierExpression(t *testing.T) {
 	input := "foobar;"
 
@@ -154,6 +119,154 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	}
 	assert.Equal(t, literal.Value, int64(5))
 	assert.Equal(t, literal.TokenLiteral(), "5")
+}
+
+func TestParsingPrefixExpressions(t *testing.T) {
+	prefixTests := []struct {
+		input        string
+		operator     string
+		integerValue int64
+	}{
+		{"!5;", "!", 5},
+		{"-15;", "-", 15},
+	}
+
+	for _, tt := range prefixTests {
+		lexer := lexer.New(tt.input)
+		parser := parser.New(lexer)
+		program := parser.ParseProgram()
+		checkParseErrors(t, parser)
+
+		assert.Len(t, program.Statements, 1)
+
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+		}
+
+		expr, ok := stmt.Expression.(*ast.PrefixExpression)
+		if !ok {
+			t.Fatalf("stmt is not ast.PrefixExpression. got=%T", stmt.Expression)
+		}
+
+		assert.Equal(t, expr.Operator, tt.operator)
+		if !testIntegerLiteral(t, expr.Right, tt.integerValue) {
+			return
+		}
+	}
+}
+
+func TestParserInfixExpressions(t *testing.T) {
+	infixTests := []struct {
+		input      string
+		leftValue  int64
+		operator   string
+		rightValue int64
+	}{
+		{"5 + 5;", 5, "+", 5},
+		{"5 - 5;", 5, "-", 5},
+		{"5 * 5;", 5, "*", 5},
+		{"5 / 5;", 5, "/", 5},
+		{"5 > 5;", 5, ">", 5},
+		{"5 < 5;", 5, "<", 5},
+		{"5 == 5;", 5, "==", 5},
+		{"5 != 5;", 5, "!=", 5},
+	}
+
+	for _, tt := range infixTests {
+		lexer := lexer.New(tt.input)
+		parser := parser.New(lexer)
+		program := parser.ParseProgram()
+		checkParseErrors(t, parser)
+
+		assert.Len(t, program.Statements, 1)
+
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+		}
+
+		expr, ok := stmt.Expression.(*ast.InfixExpression)
+		if !ok {
+			t.Fatalf("expr is not ast.InfixExpression. got=%T", stmt.Expression)
+		}
+
+		if !testIntegerLiteral(t, expr.Left, tt.leftValue) {
+			return
+		}
+
+		assert.Equal(t, expr.Operator, tt.operator)
+
+		if !testIntegerLiteral(t, expr.Right, tt.rightValue) {
+			return
+		}
+	}
+}
+
+func TestOperatorPrecedenceParsing(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			"-a * b",
+			"((-a) * b)",
+		},
+		{
+			"!-a",
+			"(!(-a))",
+		},
+		{
+			"a + b + c",
+			"((a + b) + c)",
+		},
+		{
+			"a + b - c",
+			"((a + b) - c)",
+		},
+		{
+			"a * b * c",
+			"((a * b) * c)",
+		},
+		{
+			"a * b / c",
+			"((a * b) / c)",
+		},
+		{
+			"a + b / c",
+			"(a + (b / c))",
+		},
+		{
+			"a + b * c + d / e - f",
+			"(((a + (b * c)) + (d / e)) - f)",
+		},
+		{
+			"3 + 4; -5 * 5",
+			"(3 + 4)((-5) * 5)",
+		},
+		{
+			"5 > 4 == 3 < 4",
+			"((5 > 4) == (3 < 4))",
+		},
+		{
+			"5 < 4 != 3 > 4",
+			"((5 < 4) != (3 > 4))",
+		},
+		{
+			"3 + 4 * 5 == 3 * 1 + 4 * 5",
+			"((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
+		},
+	}
+
+	for _, tt := range tests {
+		lexer := lexer.New(tt.input)
+		parser := parser.New(lexer)
+		program := parser.ParseProgram()
+		checkParseErrors(t, parser)
+
+		actual := program.String()
+		assert.Equal(t, actual, tt.expected)
+	}
 }
 
 func testIntegerLiteral(t *testing.T, literal ast.Expression, value int64) bool {
