@@ -106,6 +106,23 @@ func (stmt *ExpressionStatement) String() string {
 	return ""
 }
 
+type PrefixExpression struct {
+	Token    token.Token
+	Operator string
+	Right    Expression
+}
+
+func (expr *PrefixExpression) expressionNode()      {}
+func (expr *PrefixExpression) TokenLiteral() string { return expr.Token.Literal }
+func (expr *PrefixExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString("(")
+	out.WriteString(expr.Operator)
+	out.WriteString(expr.Right.String())
+	out.WriteString(")")
+	return out.String()
+}
+
 type Identifier struct {
 	Token token.Token
 	Value string
