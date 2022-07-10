@@ -316,6 +316,91 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 	}
 }
 
+func TestIfExpression(t *testing.T) {
+	input := `if (x < y) { x }`
+
+	lexer := lexer.New(input)
+	parser := parser.New(lexer)
+	program := parser.ParseProgram()
+	checkParseErrors(t, parser)
+
+	assert.Len(t, program.Statements, 1)
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	expr, ok := stmt.Expression.(*ast.IfExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.IfExpression. got=%T", stmt.Expression)
+	}
+
+	if !testInfixExpression(t, expr.Condition, "x", "<", "y") {
+		return
+	}
+
+	assert.Len(t, expr.ThenBranch.Statements, 1)
+
+	thenBranch, ok := expr.ThenBranch.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("expr.ThenBranch.Statements[0] is not ast.ExpressionStatement. got=%T", expr.ThenBranch.Statements[0])
+	}
+
+	if !testIdentifier(t, thenBranch.Expression, "x") {
+		return
+	}
+
+	assert.Nil(t, expr.ElseBranch)
+}
+
+func TestIfElseExpression(t *testing.T) {
+	input := `if (x < y) { x } else { y }`
+
+	lexer := lexer.New(input)
+	parser := parser.New(lexer)
+	program := parser.ParseProgram()
+	checkParseErrors(t, parser)
+
+	assert.Len(t, program.Statements, 1)
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	expr, ok := stmt.Expression.(*ast.IfExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.IfExpression. got=%T", stmt.Expression)
+	}
+
+	if !testInfixExpression(t, expr.Condition, "x", "<", "y") {
+		return
+	}
+
+	assert.Len(t, expr.ThenBranch.Statements, 1)
+
+	thenBranch, ok := expr.ThenBranch.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("expr.ThenBranch.Statements[0] is not ast.ExpressionStatement. got=%T", expr.ThenBranch.Statements[0])
+	}
+
+	if !testIdentifier(t, thenBranch.Expression, "x") {
+		return
+	}
+
+	assert.NotNil(t, expr.ElseBranch)
+
+	elseBranch, ok := expr.ElseBranch.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("expr.ElseBranch.Statements[0] is not ast.ExpressionStatement. got=%T", expr.ThenBranch.Statements[0])
+	}
+
+	if !testIdentifier(t, elseBranch.Expression, "y") {
+		return
+	}
+}
+
 func testIntegerLiteral(t *testing.T, literal ast.Expression, value int64) bool {
 	integerLiteral, ok := literal.(*ast.IntegerLiteral)
 	if !ok {

@@ -52,6 +52,21 @@ func NewProgram() *Program {
 	return &Program{Statements: []Statement{}}
 }
 
+type BlockStatement struct {
+	Token      token.Token // the '{' token
+	Statements []Statement
+}
+
+func (stmt *BlockStatement) statementNode()       {}
+func (stmt *BlockStatement) TokenLiteral() string { return stmt.Token.Literal }
+func (stmt *BlockStatement) String() string {
+	var out bytes.Buffer
+	for _, s := range stmt.Statements {
+		out.WriteString(s.String())
+	}
+	return out.String()
+}
+
 type LetStatement struct {
 	Token token.Token
 	Name  *Identifier
@@ -139,6 +154,28 @@ func (expr *InfixExpression) String() string {
 	out.WriteString(" " + expr.Operator + " ")
 	out.WriteString(expr.Right.String())
 	out.WriteString(")")
+	return out.String()
+}
+
+type IfExpression struct {
+	Token      token.Token // the 'if' token
+	Condition  Expression
+	ThenBranch *BlockStatement
+	ElseBranch *BlockStatement
+}
+
+func (expr *IfExpression) expressionNode()      {}
+func (expr *IfExpression) TokenLiteral() string { return expr.Token.Literal }
+func (expr *IfExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString("if")
+	out.WriteString(expr.Condition.String())
+	out.WriteString(" ")
+	out.WriteString(expr.ThenBranch.String())
+	if expr.ElseBranch != nil {
+		out.WriteString("else ")
+		out.WriteString(expr.ElseBranch.String())
+	}
 	return out.String()
 }
 
