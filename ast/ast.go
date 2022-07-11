@@ -3,6 +3,7 @@ package ast
 import (
 	"bytes"
 	"monkey/token"
+	"strings"
 )
 
 /**********************************************************
@@ -176,6 +177,31 @@ func (expr *IfExpression) String() string {
 		out.WriteString("else ")
 		out.WriteString(expr.ElseBranch.String())
 	}
+	return out.String()
+}
+
+type FunctionLiteral struct {
+	Token      token.Token // the 'fn' token
+	Parameters []*Identifier
+	Body       *BlockStatement
+}
+
+func (expr *FunctionLiteral) expressionNode()      {}
+func (expr *FunctionLiteral) TokenLiteral() string { return expr.Token.Literal }
+func (expr *FunctionLiteral) String() string {
+	var out bytes.Buffer
+
+	params := []string{}
+	for _, param := range expr.Parameters {
+		params = append(params, param.String())
+	}
+
+	out.WriteString(expr.Token.Literal)
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(") ")
+	out.WriteString(expr.Body.String())
+
 	return out.String()
 }
 
