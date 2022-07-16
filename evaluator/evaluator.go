@@ -148,6 +148,11 @@ func isTruthy(obj object.Object) bool {
 	case FALSE:
 		return false
 	default:
-		return true
+		switch obj := obj.(type) {
+		case *object.Integer:
+			return obj.Value != 0
+		default:
+			return true
+		}
 	}
 }
