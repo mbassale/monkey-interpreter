@@ -63,6 +63,8 @@ func TestSource(t *testing.T) {
 
 	10==10;
 	10!=9;
+	"foobar"
+	"foo bar"
 	`
 
 	tests := []struct {
@@ -155,6 +157,10 @@ func TestSource(t *testing.T) {
 		{token.NOT_EQUAL, "!="},
 		{token.INT, "9"},
 		{token.SEMICOLON, ";"},
+
+		// line 21
+		{token.STRING, "foobar"},
+		{token.STRING, "foo bar"},
 
 		// EOF
 		{token.EOF, ""},
