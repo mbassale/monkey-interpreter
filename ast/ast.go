@@ -258,3 +258,12 @@ type BooleanLiteral struct {
 func (expr *BooleanLiteral) expressionNode()      {}
 func (expr *BooleanLiteral) TokenLiteral() string { return expr.Token.Literal }
 func (expr *BooleanLiteral) String() string       { return expr.Token.Literal }
+
+type StringLiteral struct {
+	Token token.Token
+	Value string
+}
+
+func (expr *StringLiteral) expressionNode()      {}
+func (expr *StringLiteral) TokenLiteral() string { return expr.Token.Literal }
+func (expr *StringLiteral) String() string       { return expr.Token.Literal }

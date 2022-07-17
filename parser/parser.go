@@ -57,6 +57,7 @@ func New(lexer *lexer.Lexer) *Parser {
 	parser.registerPrefix(token.MINUS, parser.parsePrefixExpression)
 	parser.registerPrefix(token.TRUE, parser.parseBooleanLiteral)
 	parser.registerPrefix(token.FALSE, parser.parseBooleanLiteral)
+	parser.registerPrefix(token.STRING, parser.parseStringLiteral)
 	parser.registerPrefix(token.LPAREN, parser.parseGroupedExpression)
 	parser.registerPrefix(token.IF, parser.parseIfExpression)
 	parser.registerPrefix(token.FUNCTION, parser.parseFunctionLiteral)
@@ -84,9 +85,7 @@ func (parser *Parser) ParseProgram() *ast.Program {
 	program := ast.NewProgram()
 	for parser.currentToken.Type != token.EOF {
 		stmt := parser.parseStatement()
-		if stmt != nil {
-			program.Statements = append(program.Statements, stmt)
-		}
+		program.Statements = append(program.Statements, stmt)
 		parser.nextToken()
 	}
 	return program
@@ -220,6 +219,10 @@ func (parser *Parser) parseIntegerLiteral() ast.Expression {
 
 func (parser *Parser) parseBooleanLiteral() ast.Expression {
 	return &ast.BooleanLiteral{Token: parser.currentToken, Value: parser.currentTokenIs(token.TRUE)}
+}
+
+func (parser *Parser) parseStringLiteral() ast.Expression {
+	return &ast.StringLiteral{Token: parser.currentToken, Value: parser.currentToken.Literal}
 }
 
 func (parser *Parser) parsePrefixExpression() ast.Expression {
