@@ -203,13 +203,24 @@ func evalIntegerInfixExpression(operator string, left object.Object, right objec
 }
 
 func evalStringInfixExpression(operator string, left object.Object, right object.Object) object.Object {
-	if operator != "+" {
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+
+	switch operator {
+	case "+":
+		return &object.String{Value: leftVal + rightVal}
+	case "<":
+		return nativeBoolToBooleanObject(leftVal < rightVal)
+	case ">":
+		return nativeBoolToBooleanObject(leftVal > rightVal)
+	case "==":
+		return nativeBoolToBooleanObject(leftVal == rightVal)
+	case "!=":
+		return nativeBoolToBooleanObject(leftVal != rightVal)
+	default:
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
 
-	leftVal := left.(*object.String).Value
-	rightVal := right.(*object.String).Value
-	return &object.String{Value: leftVal + rightVal}
 }
 
 func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
