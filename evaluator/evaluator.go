@@ -13,7 +13,7 @@ var (
 )
 
 var builtins = map[string]*object.Builtin{
-	"len": &object.Builtin{
+	"len": {
 		Fn: func(args ...object.Object) object.Object {
 			if len(args) != 1 {
 				return newError("wrong number of arguments. got=%d, want=1", len(args))
@@ -24,6 +24,37 @@ var builtins = map[string]*object.Builtin{
 			default:
 				return newError("argument to `len` not supported. got %s", args[0].Type())
 			}
+		},
+	},
+	"print": {
+		Fn: func(args ...object.Object) object.Object {
+			if len(args) == 0 {
+				fmt.Println()
+			} else {
+				var nativeArgs []interface{}
+				var format string
+				switch arg := args[0].(type) {
+				case *object.String:
+					format = arg.Value
+				default:
+					return newError("format must be STRING. got=%s", arg.Type())
+				}
+				for _, arg := range args[1:] {
+					switch arg := arg.(type) {
+					case *object.Boolean:
+						nativeArgs = append(nativeArgs, arg.Value)
+					case *object.Integer:
+						nativeArgs = append(nativeArgs, arg.Value)
+					case *object.String:
+						nativeArgs = append(nativeArgs, arg.Value)
+					default:
+						return newError("non-printable type. got=%s", arg.Type())
+					}
+				}
+				fmt.Printf(format, nativeArgs...)
+				fmt.Println()
+			}
+			return NULL
 		},
 	},
 }
