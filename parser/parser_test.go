@@ -537,6 +537,29 @@ func TestParsingArrayLiterals(t *testing.T) {
 	testInfixExpression(t, array.Elements[2], 3, "+", 3)
 }
 
+func TestParsingIndexExpressions(t *testing.T) {
+	input := "myArray[1 + 1]"
+
+	lexer := lexer.New(input)
+	parser := parser.New(lexer)
+	program := parser.ParseProgram()
+	checkParseErrors(t, parser)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	indexExpr, ok := stmt.Expression.(*ast.IndexExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression not *ast.IndexExpression. got=%T", stmt.Expression)
+	}
+
+	if !testIdentifier(t, indexExpr.Left, "myArray") {
+		return
+	}
+
+	if !testInfixExpression(t, indexExpr.Index, 1, "+", 1) {
+		return
+	}
+}
+
 func testIntegerLiteral(t *testing.T, literal ast.Expression, value int64) bool {
 	integerLiteral, ok := literal.(*ast.IntegerLiteral)
 	if !ok {
