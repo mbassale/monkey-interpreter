@@ -297,6 +297,9 @@ func TestBuiltinFunctions(t *testing.T) {
 		{`last([1, 2, 3])`, 3},
 		{`last([1])`, 1},
 		{`last([])`, nil},
+		{`rest([1, 2, 3])`, []int{2, 3}},
+		{`rest([1])`, []int{}},
+		{`rest([])`, nil},
 	}
 
 	for _, tt := range tests {
@@ -311,6 +314,10 @@ func TestBuiltinFunctions(t *testing.T) {
 				continue
 			}
 			assert.Equal(t, errObj.Message, expected)
+		case []int:
+			if !testArrayOfIntObject(t, evaluated, expected) {
+				continue
+			}
 		}
 	}
 }
@@ -428,4 +435,23 @@ func testNullObject(t *testing.T, obj object.Object) bool {
 		return false
 	}
 	return true
+}
+
+func testArrayOfIntObject(t *testing.T, obj object.Object, expected []int) bool {
+	arrObj, ok := obj.(*object.Array)
+	if !ok {
+		t.Errorf("object is not Array. got=%T (%+v)", obj, obj)
+		return false
+	}
+
+	assert.Equal(t, len(arrObj.Elements), len(expected))
+
+	arrInt := []int{}
+	for _, item := range arrObj.Elements {
+		if !assert.Equal(t, string(item.Type()), object.INTEGER_OBJ) {
+			return false
+		}
+		arrInt = append(arrInt, int(item.(*object.Integer).Value))
+	}
+	return assert.Equal(t, arrInt, expected)
 }
