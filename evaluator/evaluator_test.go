@@ -292,6 +292,11 @@ func TestBuiltinFunctions(t *testing.T) {
 		{`len([])`, 0},
 		{`len([1, 2, 3])`, 3},
 		{`first([1, 2, 3])`, 1},
+		{`first([1])`, 1},
+		{`first([])`, nil},
+		{`last([1, 2, 3])`, 3},
+		{`last([1])`, 1},
+		{`last([])`, nil},
 	}
 
 	for _, tt := range tests {
